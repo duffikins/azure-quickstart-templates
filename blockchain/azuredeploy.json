@@ -10,6 +10,7 @@
     },
     "adminUsername": {
       "type": "string",
+      "defaultValue": "pcuser"
       "metadata": {
         "description": "This is the the username you wish to assign to your VMs admin account"
       }
@@ -50,10 +51,6 @@
       "type": "string",
       "defaultValue": "Standard_D1_v2",
       "allowedValues": [
-        "Standard_A1",
-        "Standard_A2",
-        "Standard_A3",
-        "Standard_A4",
         "Standard_D1_v2",
         "Standard_D2_v2",
         "Standard_D3_v2",
@@ -217,7 +214,7 @@
     },
     {
       "type": "Microsoft.Compute/virtualMachines/extensions",
-      "name": "[concat(variables('vmName'),'/newuserscript')]",
+      "name": "[concat(variables('vmName'), '/newuser')]",
       "apiVersion": "2015-06-15",
       "location": "[parameters('location')]",
       "dependsOn": [
@@ -234,7 +231,7 @@
           ]
         },
         "protectedSettings": {
-          "commandToExecute": "[variables(concat('commandToExecute', parameters('blockchainSoftware')))]"
+          "commandToExecute": "[variables(concat(parameters('_artifactsLocation'), 'scripts/', parameters('blockchainSoftware'), '.sh'))]"
         }
       }
     }
