@@ -39,7 +39,8 @@
         "stratis",
         "syscoin",
         "vcash",
-        "viacoin"
+        "viacoin",
+        "yobichain"
       ],
       "metadata": {
         "description": "The block chain software to install on the VM"
@@ -67,7 +68,7 @@
       "metadata": {
         "description": "The base URI where artifacts required by this template are located. When the template is deployed using the accompanying scripts, a private location in the subscription will be used and this value will be automatically generated."
       },
-      "defaultValue": "https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/blockchain/"
+      "defaultValue": "https://github.com/duffikins/azure-quickstart-templates/tree/master/blockchain"
     },
     "_artifactsLocationSasToken": {
       "type": "securestring",
@@ -89,7 +90,7 @@
     "addressPrefix": "10.0.0.0/16",
     "imagePublisher": "Canonical",
     "imageVersion": "latest",
-    "imageSKU": "14.04.4-LTS",
+    "imageSKU": "16.04.4-LTS",
     "imageOffer": "UbuntuServer",
     "subnetName": "Subnet-1",
     "subnetPrefix": "10.0.0.0/24",
