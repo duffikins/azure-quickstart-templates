@@ -2,6 +2,11 @@
 #
 export TERM=xterm-color
 
+set -e 
+
+sudo apt-get update
+sudo apt-get install git -y
+
 echo -e '----------------------------------------'
 echo -e ' DOWNLOADING yobichain from Github '
 echo -e '----------------------------------------'
