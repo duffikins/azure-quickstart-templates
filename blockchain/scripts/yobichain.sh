@@ -2,6 +2,8 @@
 # 
 export TERM=xterm-color
 
+set -e
+
 echo -e '----------------------------------------'
 echo -e ' DOWNLOADING yobichain from Github '
 echo -e '----------------------------------------'
