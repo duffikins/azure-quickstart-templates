@@ -66,4 +66,4 @@ To set up Yobichain, you will need 1 server (min 2 GB RAM, 2 CPUs) running Ubunt
 
 ## Contributors
 
-Yobichain is maintained by Sripathi Srinivasan, Blockchain Engineer, [Primechain Technologies Pvt. Ltd.](http://www.primechaintech.com). 
+Yobichain is maintained by [Primechain Technologies Pvt. Ltd.](http://www.primechaintech.com). 
