@@ -6,4 +6,4 @@ This Microsoft Azure Resource Manager template deploys a single VM and allows yo
 
 Options for blockchain software include:
 
-- [Yobichain](https://github.com/Azure/azure-quickstart-templates/blob/master/blockchain/details/Yobichain.md)
+- [Yobichain](https://github.com/duffikins/azure-quickstart-templates/blob/master/blockchain/details/Yobichain.md)
