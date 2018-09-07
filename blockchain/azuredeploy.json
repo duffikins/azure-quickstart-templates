@@ -3,80 +3,90 @@
   "contentVersion": "1.0.0.0",
   "parameters": {
     "vmDnsPrefix": {
-      "type": "string",
+      "defaultValue": "yobi",
+      "type": "String",
       "metadata": {
         "description": "This is the unique DNS name of the for the public IP for your VM"
       }
     },
     "adminUsername": {
-      "type": "string",
       "defaultValue": "pcuser",
+      "type": "String",
       "metadata": {
-        "description": "This is the the username you wish to assign to your VMs admin account"
+        "description": "This is the username you wish to assign to your VMs admin account"
       }
     },
     "adminPassword": {
-      "type": "securestring",
+      "type": "SecureString",
       "metadata": {
-        "description": "This is the the password you wish to assign to your VMs admin account"
+        "description": "This is the password you wish to assign to your VMs admin account"
       }
     },
     "blockchainSoftware": {
-      "type": "string",
-      "allowedValues": [
-        "bitshares",
-        "bitswift",
-        "blocknet",
-        "bloqenterprise",
-        "digibyte",
-        "emercoin",
-        "influx",
-        "jumbucks",
-        "monero",
-        "multichain",
-        "nxt",
-        "okcash",
-        "shadow",
-        "stratis",
-        "syscoin",
-        "vcash",
-        "viacoin",
-        "yobichain"
-      ],
+      "defaultValue": "yobichain",
+      "type": "String",
       "metadata": {
         "description": "The block chain software to install on the VM"
       }
     },
     "vmSize": {
-      "type": "string",
-      "defaultValue": "Standard_D1_v2",
+      "defaultValue": "Standard_B1s",
       "allowedValues": [
+        "Standard_A1_v2",
+        "Standard_B1s",
         "Standard_D1_v2",
-        "Standard_D2_v2",
-        "Standard_D3_v2",
-        "Standard_D4_v2"
+        "Standard_DS1_v2",
+        "Standard_D2_v3",
+        "Standard_D2s_v3",
+        "Standard_D4_v2 "
       ],
+      "type": "String",
       "metadata": {
         "description": "Size of VM"
       }
     },
+    "chainName": {
+      "defaultValue": "yobichain",
+      "type": "String",
+      "metadata": {
+        "description": "This is the name of the chain."
+      }
+    },
+    "networkPort": {
+      "defaultValue": "61172",
+      "type": "String",
+      "metadata": {
+        "description": "This is the network Port number used by yobichain."
+      }
+    },
+    "rpcPort": {
+      "defaultValue": "15590",
+      "type": "String",
+      "metadata": {
+        "description": "This is the rpc Port number used by yobichain."
+      }
+    },
+    "networkSecurityGroups": {
+      "defaultValue": "yobichain-nsg",
+      "type": "String"
+    },
     "_artifactsLocation": {
-      "type": "string",
+      "defaultValue": "https://raw.githubusercontent.com/duffikins/azure-quickstart-templates/master/blockchain/",
+      "type": "String",
       "metadata": {
         "description": "The base URI where artifacts required by this template are located. When the template is deployed using the accompanying scripts, a private location in the subscription will be used and this value will be automatically generated."
-      },
-      "defaultValue": "https://github.com/duffikins/azure-quickstart-templates/tree/master/blockchain"
+      }
     },
-    "_artifactsLocationSasToken": {
-      "type": "securestring",
+    "commandToExecute": {
+      "defaultValue": "sudo git clone https://github.com/Primechain/yobichain.git && cd yobichain/setup && sudo bash -e master.sh",
+      "type": "String",
       "metadata": {
-        "description": "The sasToken required to access _artifactsLocation.  When the template is deployed using the accompanying scripts, a sasToken will be automatically generated."
-      },
-      "defaultValue": ""
+        "description": "The command to execute."
+      }
     },
     "location": {
-      "type": "string",
       "defaultValue": "[resourceGroup().location]",
+      "type": "String",
       "metadata": {
         "description": "Location for all resources."
       }
@@ -94,8 +104,8 @@
     "storageAccountType": "Standard_LRS",
     "publicIPAddressName": "publicIP",
     "publicIPAddressType": "Dynamic",
-    "vmStorageAccountContainerName": "vhds",
-    "vmName": "[parameters('vmDnsPrefix')]",
+    "vmStorageAccountContainerName": "vhd",
+    "vmName": "[concat(parameters('vmDnsPrefix'), 'chain')]",
     "virtualNetworkName": "VNET",
     "subnetRef": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('virtualNetworkName'), variables('subnetName'))]",
     "storageAccountName": "[concat(uniquestring(resourceGroup().id, 'block'))]"
@@ -111,9 +121,9 @@
       }
     },
     {
-      "apiVersion": "2015-06-15",
       "type": "Microsoft.Network/publicIPAddresses",
       "name": "[variables('publicIPAddressName')]",
+      "apiVersion": "2015-06-15",
       "location": "[parameters('location')]",
       "properties": {
         "publicIPAllocationMethod": "[variables('publicIPAddressType')]",
@@ -123,9 +133,9 @@
       }
     },
     {
-      "apiVersion": "2015-06-15",
       "type": "Microsoft.Network/virtualNetworks",
       "name": "[variables('virtualNetworkName')]",
+      "apiVersion": "2015-06-15",
       "location": "[parameters('location')]",
       "properties": {
         "addressSpace": {
@@ -144,14 +154,10 @@
       }
     },
     {
-      "apiVersion": "2015-06-15",
       "type": "Microsoft.Network/networkInterfaces",
       "name": "[variables('nicName')]",
+      "apiVersion": "2015-06-15",
       "location": "[parameters('location')]",
-      "dependsOn": [
-        "[concat('Microsoft.Network/publicIPAddresses/', variables('publicIPAddressName'))]",
-        "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]"
-      ],
       "properties": {
         "ipConfigurations": [
           {
@@ -166,18 +172,23 @@
               }
             }
           }
-        ]
-      }
+        ],
+        "networkSecurityGroup": {
+          "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroups'))]"
+        },
+        "primary": true
+      },
+      "dependsOn": [
+        "[concat('Microsoft.Network/publicIPAddresses/', variables('publicIPAddressName'))]",
+        "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]",
+        "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroups'))]"
+      ]
     },
     {
-      "apiVersion": "2015-06-15",
       "type": "Microsoft.Compute/virtualMachines",
       "name": "[variables('vmName')]",
+      "apiVersion": "2015-06-15",
       "location": "[parameters('location')]",
-      "dependsOn": [
-        "[concat('Microsoft.Storage/storageAccounts/', variables('storageAccountName'))]",
-        "[concat('Microsoft.Network/networkInterfaces/', variables('nicName'))]"
-      ],
       "properties": {
         "hardwareProfile": {
           "vmSize": "[parameters('vmSize')]"
@@ -210,16 +221,17 @@
             }
           ]
         }
-      }
+      },
+      "dependsOn": [
+        "[concat('Microsoft.Storage/storageAccounts/', variables('storageAccountName'))]",
+        "[concat('Microsoft.Network/networkInterfaces/', variables('nicName'))]"
+      ]
     },
     {
       "type": "Microsoft.Compute/virtualMachines/extensions",
-      "name": "[concat(variables('vmName'), '/newuser')]",
+      "name": "[concat(variables('vmName'), '/VM')]",
       "apiVersion": "2015-06-15",
       "location": "[parameters('location')]",
-      "dependsOn": [
-        "[concat('Microsoft.Compute/virtualMachines/', variables('vmName'))]"
-      ],
       "properties": {
         "publisher": "Microsoft.Azure.Extensions",
         "type": "CustomScript",
@@ -227,13 +239,152 @@
         "autoUpgradeMinorVersion": true,
         "settings": {
           "fileUris": [
-            "[concat(parameters('_artifactsLocation'), 'scripts/', parameters('blockchainSoftware'), '.sh')]"
+            "[concat(parameters('_artifactsLocation'), parameters('blockchainSoftware'), '.sh')]"
           ]
         },
         "protectedSettings": {
-          "commandToExecute": "[variables(concat(parameters('_artifactsLocation'), 'scripts/', parameters('blockchainSoftware'), '.sh'))]"
+          "commandToExecute": "[concat(parameters('commandToExecute'), ' ', parameters('chainName'), ' ', parameters('networkPort'), ' ', parameters('rpcPort'))]"
         }
-      }
+      },
+      "dependsOn": [
+        "[concat('Microsoft.Compute/virtualMachines/', variables('vmName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "name": "[parameters('networkSecurityGroups')]",
+      "apiVersion": "2018-02-01",
+      "location": "[parameters('location')]",
+      "properties": {
+        "securityRules": [
+          {
+            "name": "Port_80",
+            "properties": {
+              "protocol": "*",
+              "sourcePortRange": "*",
+              "destinationPortRange": "80",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": 201,
+              "direction": "Inbound"
+            }
+          },
+          {
+            "name": "Port_1410",
+            "properties": {
+              "protocol": "*",
+              "sourcePortRange": "*",
+              "destinationPortRange": "1410",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": 202,
+              "direction": "Inbound"
+            }
+          },
+          {
+            "name": "Port_2750",
+            "properties": {
+              "protocol": "*",
+              "sourcePortRange": "*",
+              "destinationPortRange": "2750",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": 203,
+              "direction": "Inbound"
+            }
+          },
+          {
+            "name": "default-allow-ssh",
+            "properties": {
+              "protocol": "*",
+              "sourcePortRange": "*",
+              "destinationPortRange": "22",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": 1000,
+              "direction": "Inbound"
+            }
+          }
+        ],
+        "defaultSecurityRules": [
+          {
+            "name": "AllowVnetInBound",
+            "properties": {
+              "provisioningState": "Succeeded",
+              "description": "Allow inbound traffic from all VMs in VNET",
+              "protocol": "*",
+              "sourcePortRange": "*",
+              "destinationPortRange": "*",
+              "sourceAddressPrefix": "VirtualNetwork",
+              "destinationAddressPrefix": "VirtualNetwork",
+              "access": "Allow",
+              "priority": 65000,
+              "direction": "Inbound"
+            }
+          },
+          {
+            "name": "DenyAllInBound",
+            "properties": {
+              "description": "Deny all inbound traffic",
+              "protocol": "*",
+              "sourcePortRange": "*",
+              "destinationPortRange": "*",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "*",
+              "access": "Deny",
+              "priority": 65500,
+              "direction": "Inbound"
+            }
+          },
+          {
+            "name": "AllowVnetOutBound",
+            "properties": {
+              "description": "Allow outbound traffic from all VMs to all VMs in VNET",
+              "protocol": "*",
+              "sourcePortRange": "*",
+              "destinationPortRange": "*",
+              "sourceAddressPrefix": "VirtualNetwork",
+              "destinationAddressPrefix": "VirtualNetwork",
+              "access": "Allow",
+              "priority": 65000,
+              "direction": "Outbound"
+            }
+          },
+          {
+            "name": "AllowInternetOutBound",
+            "properties": {
+              "description": "Allow outbound traffic from all VMs to Internet",
+              "protocol": "*",
+              "sourcePortRange": "*",
+              "destinationPortRange": "*",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "Internet",
+              "access": "Allow",
+              "priority": 65001,
+              "direction": "Outbound"
+            }
+          },
+          {
+            "name": "DenyAllOutBound",
+            "properties": {
+              "description": "Deny all outbound traffic",
+              "protocol": "*",
+              "sourcePortRange": "*",
+              "destinationPortRange": "*",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "*",
+              "access": "Deny",
+              "priority": 65500,
+              "direction": "Outbound"
+            }
+          }
+        ]
+      },
+      "dependsOn": []
     }
   ]
 }
